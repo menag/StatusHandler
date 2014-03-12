@@ -2,22 +2,40 @@ package StatusHandlerConfig
 
 public constant int STUN_ABILITY_ID = 'SAST'
 public constant int STUN_BUFF_ID = 'SBST'
+public constant string STUN_TOOLTIP_NORMAL = "Stunned"
+public constant string STUN_TOOLTIP_EXTENDED = "This unit is stunned; it cannot move, attack or cast spells."
+public constant string STUN_ICON_PATH = "ReplaceableTextures\\CommandButtons\\BTNStun.blp"
 
 public constant int SILENCE_ABILITY_ID = 'SASI'
 public constant int SILENCE_BUFF_ID = 'SBSI'
+public constant string SILENCE_TOOLTIP_NORMAL = "Silence"
+public constant string SILENCE_TOOLTIP_EXTENDED = "This unit is silenced; it cannot cast spells."
+public constant string SILENCE_ICON_PATH = "ReplaceableTextures\\CommandButtons\\BTNSilence.blp"
 
-public constant int DISARM_ALL_ABILITY_ID = 'SADA'
-public constant int DISARM_ALL_BUFF_ID = 'SBDA'
+public constant int DISARM_BOTH_ABILITY_ID = 'SADA'
+public constant int DISARM_BOTH_BUFF_ID = 'SBDA'
+public constant string DISARM_BOTH_TOOLTIP_NORMAL = "Disarmed"
+public constant string DISARM_BOTH_TOOLTIP_EXTENDED = "This unit is disarmed; it cannot attack."
+public constant string DISARM_BOTH_ICON_PATH = "ReplaceableTextures\\CommandButtons\\BTNBattleStations.blp"
 
 public constant int DISARM_MELEE_ABILITY_ID = 'SADM'
 public constant int DISARM_MELEE_BUFF_ID = 'SBDM'
+public constant string DISARM_MELEE_TOOLTIP_NORMAL = "Disarmed (Melee)"
+public constant string DISARM_MELEE_TOOLTIP_EXTENDED = "This unit is disarmed; it cannot use melee attacks."
+public constant string DISARM_MELEE_ICON_PATH = "ReplaceableTextures\\CommandButtons\\BTNBattleStations.blp"
 
 public constant int DISARM_RANGED_ABILITY_ID = 'SADR'
 public constant int DISARM_RANGED_BUFF_ID = 'SBDR'
+public constant string DISARM_RANGED_TOOLTIP_NORMAL = "Disarmed (Ranged)"
+public constant string DISARM_RANGED_TOOLTIP_EXTENDED = "This unit is disarmed; it cannot use ranged attacks."
+public constant string DISARM_RANGED_ICON_PATH = "ReplaceableTextures\\CommandButtons\\BTNBattleStations.blp"
 
 public constant int ENSNARE_ABILITY_ID = 'SAEN'
 public constant int ENSNARE1_BUFF_ID = 'SBE1'
 public constant int ENSNARE2_BUFF_ID = 'SBE2'
+public constant string ENSNARE_TOOLTIP_NORMAL = "Ensnared"
+public constant string ENSNARE_TOOLTIP_EXTENDED = "This unit is ensnared, it cannot move or fly."
+public constant string ENSNARE_ICON_PATH = "ReplaceableTextures\\CommandButtons\\BTNWirtsOtherLeg.blp"
 
 public function unit.getIndex() returns int
 	return 0

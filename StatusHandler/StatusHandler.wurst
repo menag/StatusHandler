@@ -5,7 +5,7 @@ import StatusHandlerConfig
 
 constant int STUN_ORDER_ID = 852231
 constant int SILENCE_ORDER_ID = 852668
-constant int DISARM_ALL_ORDER_ID = 852585
+constant int DISARM_BOTH_ORDER_ID = 852585
 constant int DISARM_MELEE_ORDER_ID = 852585
 constant int DISARM_RANGED_ORDER_ID = 852585
 constant int ENSNARE_ORDER_ID = 852106
@@ -17,7 +17,7 @@ constant unit STATUS_DUMMY2 = CreateUnit(DUMMY_PLAYER, DUMMY_UNIT_ID, 0., 0., 0.
 public class StatusHandler
 	static int array stunCounter
 	static int array silenceCounter
-	static int array disarmAllCounter
+	static int array disarmBothCounter
 	static int array disarmMeleeCounter
 	static int array disarmRangedCounter
 	static int array ensnareCounter
@@ -25,7 +25,7 @@ public class StatusHandler
 	construct(unit u)
 		stunCounter[u.getIndex()] = 0
 		silenceCounter[u.getIndex()] = 0
-		disarmAllCounter[u.getIndex()] = 0
+		disarmBothCounter[u.getIndex()] = 0
 		disarmMeleeCounter[u.getIndex()] = 0
 		disarmRangedCounter[u.getIndex()] = 0
 		ensnareCounter[u.getIndex()] = 0
@@ -73,19 +73,19 @@ public function unit.addEnsnareTimed(real timeout)
 	this.addEnsnare()
 	doAfter(timeout, () -> this.removeEnsnare())
 	
-public function unit.addDisarmAll()
-	StatusHandler.disarmAllCounter[this.getIndex()]++
-	if StatusHandler.disarmAllCounter[this.getIndex()] > 0
-		STATUS_DUMMY.issueTargetOrderById(DISARM_ALL_ORDER_ID, this)
+public function unit.addDisarmBoth()
+	StatusHandler.disarmBothCounter[this.getIndex()]++
+	if StatusHandler.disarmBothCounter[this.getIndex()] > 0
+		STATUS_DUMMY.issueTargetOrderById(DISARM_BOTH_ORDER_ID, this)
 
-public function unit.removeDisarmAll()
-	StatusHandler.disarmAllCounter[this.getIndex()]--
-	if StatusHandler.disarmAllCounter[this.getIndex()] == 0
-		this.removeAbility(DISARM_ALL_BUFF_ID)
+public function unit.removeDisarmBoth()
+	StatusHandler.disarmBothCounter[this.getIndex()]--
+	if StatusHandler.disarmBothCounter[this.getIndex()] == 0
+		this.removeAbility(DISARM_BOTH_BUFF_ID)
 
-public function unit.addDisarmAllTimed(real timeout)
-	this.addDisarmAll()
-	doAfter(timeout, () -> this.removeDisarmAll())
+public function unit.addDisarmBothTimed(real timeout)
+	this.addDisarmBoth()
+	doAfter(timeout, () -> this.removeDisarmBoth())
 
 public function unit.addDisarmMelee()
 	StatusHandler.disarmMeleeCounter[this.getIndex()]++
@@ -119,7 +119,7 @@ init
 	STATUS_DUMMY..hide()
 		..addAbility(STUN_ABILITY_ID)
 		..addAbility(SILENCE_ABILITY_ID)
-		..addAbility(DISARM_ALL_ABILITY_ID)
+		..addAbility(DISARM_BOTH_ABILITY_ID)
 		.addAbility(ENSNARE_ABILITY_ID)
 	STATUS_DUMMY1..hide()
 		.addAbility(DISARM_MELEE_ABILITY_ID)
