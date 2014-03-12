@@ -1,0 +1,127 @@
+package StatusHandler
+
+import ClosureTimers
+import StatusHandlerConfig
+
+constant int STUN_ORDER_ID = 852231
+constant int SILENCE_ORDER_ID = 852668
+constant int DISARM_ALL_ORDER_ID = 852585
+constant int DISARM_MELEE_ORDER_ID = 852585
+constant int DISARM_RANGED_ORDER_ID = 852585
+constant int ENSNARE_ORDER_ID = 852106
+
+constant unit STATUS_DUMMY = CreateUnit(DUMMY_PLAYER, DUMMY_UNIT_ID, 0., 0., 0.)
+constant unit STATUS_DUMMY1 = CreateUnit(DUMMY_PLAYER, DUMMY_UNIT_ID, 0., 0., 0.)
+constant unit STATUS_DUMMY2 = CreateUnit(DUMMY_PLAYER, DUMMY_UNIT_ID, 0., 0., 0.)
+
+public class StatusHandler
+	static int array stunCounter
+	static int array silenceCounter
+	static int array disarmAllCounter
+	static int array disarmMeleeCounter
+	static int array disarmRangedCounter
+	static int array ensnareCounter
+	
+	construct(unit u)
+		stunCounter[u.getIndex()] = 0
+		silenceCounter[u.getIndex()] = 0
+		disarmAllCounter[u.getIndex()] = 0
+		disarmMeleeCounter[u.getIndex()] = 0
+		disarmRangedCounter[u.getIndex()] = 0
+		ensnareCounter[u.getIndex()] = 0
+
+public function unit.addStun()
+	StatusHandler.stunCounter[this.getIndex()]++
+	if StatusHandler.stunCounter[this.getIndex()] > 0
+		STATUS_DUMMY.issueTargetOrderById(STUN_ORDER_ID, this)
+
+public function unit.removeStun()
+	StatusHandler.stunCounter[this.getIndex()]--
+	if StatusHandler.stunCounter[this.getIndex()] == 0
+		this.removeAbility(STUN_BUFF_ID)
+
+public function unit.addStunTimed(real timeout)
+	this.addStun()
+	doAfter(timeout, () -> this.removeStun())
+	
+public function unit.addSilence()
+	StatusHandler.silenceCounter[this.getIndex()]++
+	if StatusHandler.silenceCounter[this.getIndex()] > 0
+		STATUS_DUMMY.issueTargetOrderById(SILENCE_ORDER_ID, this)
+
+public function unit.removeSilence()
+	StatusHandler.silenceCounter[this.getIndex()]--
+	if StatusHandler.silenceCounter[this.getIndex()] == 0
+		this.removeAbility(SILENCE_BUFF_ID)
+
+public function unit.addSilenceTimed(real timeout)
+	this.addSilence()
+	doAfter(timeout, () -> this.removeSilence())
+	
+public function unit.addEnsnare()
+	StatusHandler.ensnareCounter[this.getIndex()]++
+	if StatusHandler.ensnareCounter[this.getIndex()] > 0
+		STATUS_DUMMY.issueTargetOrderById(ENSNARE_ORDER_ID, this)
+
+public function unit.removeEnsnare()
+	StatusHandler.ensnareCounter[this.getIndex()]--
+	if StatusHandler.ensnareCounter[this.getIndex()] == 0
+		this.removeAbility(ENSNARE1_BUFF_ID)
+		this.removeAbility(ENSNARE2_BUFF_ID)
+
+public function unit.addEnsnareTimed(real timeout)
+	this.addEnsnare()
+	doAfter(timeout, () -> this.removeEnsnare())
+	
+public function unit.addDisarmAll()
+	StatusHandler.disarmAllCounter[this.getIndex()]++
+	if StatusHandler.disarmAllCounter[this.getIndex()] > 0
+		STATUS_DUMMY.issueTargetOrderById(DISARM_ALL_ORDER_ID, this)
+
+public function unit.removeDisarmAll()
+	StatusHandler.disarmAllCounter[this.getIndex()]--
+	if StatusHandler.disarmAllCounter[this.getIndex()] == 0
+		this.removeAbility(DISARM_ALL_BUFF_ID)
+
+public function unit.addDisarmAllTimed(real timeout)
+	this.addDisarmAll()
+	doAfter(timeout, () -> this.removeDisarmAll())
+
+public function unit.addDisarmMelee()
+	StatusHandler.disarmMeleeCounter[this.getIndex()]++
+	if StatusHandler.disarmMeleeCounter[this.getIndex()] > 0
+		STATUS_DUMMY1.issueTargetOrderById(DISARM_MELEE_ORDER_ID, this)
+
+public function unit.removeDisarmMelee()
+	StatusHandler.disarmMeleeCounter[this.getIndex()]--
+	if StatusHandler.disarmMeleeCounter[this.getIndex()] == 0
+		this.removeAbility(DISARM_MELEE_BUFF_ID)
+
+public function unit.addDisarmMeleeTimed(real timeout)
+	this.addDisarmMelee()
+	doAfter(timeout, () -> this.removeDisarmMelee())
+
+public function unit.addDisarmRanged()
+	StatusHandler.disarmRangedCounter[this.getIndex()]++
+	if StatusHandler.disarmRangedCounter[this.getIndex()] > 0
+		STATUS_DUMMY2.issueTargetOrderById(DISARM_RANGED_ORDER_ID, this)
+
+public function unit.removeDisarmRanged()
+	StatusHandler.disarmRangedCounter[this.getIndex()]--
+	if StatusHandler.disarmRangedCounter[this.getIndex()] == 0
+		this.removeAbility(DISARM_RANGED_BUFF_ID)
+
+public function unit.addDisarmRangedTimed(real timeout)
+	this.addDisarmRanged()
+	doAfter(timeout, () -> this.removeDisarmRanged())
+	
+init
+	STATUS_DUMMY..hide()
+		..addAbility(STUN_ABILITY_ID)
+		..addAbility(SILENCE_ABILITY_ID)
+		..addAbility(DISARM_ALL_ABILITY_ID)
+		.addAbility(ENSNARE_ABILITY_ID)
+	STATUS_DUMMY1..hide()
+		.addAbility(DISARM_MELEE_ABILITY_ID)
+	STATUS_DUMMY2..hide()
+		.addAbility(DISARM_RANGED_ABILITY_ID)
