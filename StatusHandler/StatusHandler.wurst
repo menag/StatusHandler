@@ -14,107 +14,222 @@ constant unit STATUS_DUMMY = CreateUnit(DUMMY_PLAYER, DUMMY_UNIT_ID, 0., 0., 0.)
 constant unit STATUS_DUMMY1 = CreateUnit(DUMMY_PLAYER, DUMMY_UNIT_ID, 0., 0., 0.)
 constant unit STATUS_DUMMY2 = CreateUnit(DUMMY_PLAYER, DUMMY_UNIT_ID, 0., 0., 0.)
 
-public class StatusHandler
-	static int array stunCounter
-	static int array silenceCounter
-	static int array disarmBothCounter
-	static int array disarmMeleeCounter
-	static int array disarmRangedCounter
-	static int array ensnareCounter
+timer array stunTimer
+timer array silenceTimer
+timer array disarmBothTimer
+timer array disarmMeleeTimer
+timer array disarmRangedTimer
+timer array ensnareTimer
+int array stunCounter
+int array silenceCounter
+int array disarmBothCounter
+int array disarmMeleeCounter
+int array disarmRangedCounter
+int array ensnareCounter
+
+public function onIndex(int i)
+	stunTimer[i] = null
+	silenceTimer[i] = null
+	disarmBothTimer[i] = null
+	disarmMeleeTimer[i] = null
+	disarmRangedTimer[i] = null
+	ensnareTimer[i] = null
+	stunCounter[i] = 0
+	silenceCounter[i] = 0
+	disarmBothCounter[i] = 0
+	disarmMeleeCounter[i] = 0
+	disarmRangedCounter[i] = 0
+	ensnareCounter[i] = 0
 	
-	construct(unit u)
-		stunCounter[u.getIndex()] = 0
-		silenceCounter[u.getIndex()] = 0
-		disarmBothCounter[u.getIndex()] = 0
-		disarmMeleeCounter[u.getIndex()] = 0
-		disarmRangedCounter[u.getIndex()] = 0
-		ensnareCounter[u.getIndex()] = 0
+public function onDeindex(int i)
+	if stunTimer[i] != null
+		stunTimer[i].release()
+	if silenceTimer[i] != null
+		silenceTimer[i].release()
+	if disarmBothTimer[i] != null
+		disarmBothTimer[i].release()
+	if disarmMeleeTimer[i] != null
+		disarmMeleeTimer[i].release()
+	if disarmRangedTimer[i] != null
+		disarmRangedTimer[i].release()
+	if ensnareTimer[i] != null
+		ensnareTimer[i].release()
 
 public function unit.addStun()
-	StatusHandler.stunCounter[this.getIndex()]++
-	if StatusHandler.stunCounter[this.getIndex()] > 0
+	if not this.isStunned()
 		STATUS_DUMMY.issueTargetOrderById(STUN_ORDER_ID, this)
+	stunCounter[this.getIndex()]++
 
 public function unit.removeStun()
-	StatusHandler.stunCounter[this.getIndex()]--
-	if StatusHandler.stunCounter[this.getIndex()] == 0
+	stunCounter[this.getIndex()]--
+	if not this.isStunned()
 		this.removeAbility(STUN_BUFF_ID)
-
+	
 public function unit.addStunTimed(real timeout)
-	this.addStun()
-	doAfter(timeout, () -> this.removeStun())
+	int i = this.getIndex()
+	if stunTimer[i] != null and stunTimer[i].getRemaining() >= timeout
+		return
+		
+	if stunTimer[i] == null
+		stunTimer[i] = getTimer()..setData(i)
+		this.addStun()
+	
+	stunTimer[i].start(timeout, () -> begin
+		int j = GetExpiredTimer().getData()
+		j.getUnit().removeStun()
+		stunTimer[j].release()
+		stunTimer[j] = null
+	end)
+	
+public function unit.isStunned() returns boolean
+	return stunCounter[this.getIndex()] > 0
 	
 public function unit.addSilence()
-	StatusHandler.silenceCounter[this.getIndex()]++
-	if StatusHandler.silenceCounter[this.getIndex()] > 0
+	if not this.isSilenced()
 		STATUS_DUMMY.issueTargetOrderById(SILENCE_ORDER_ID, this)
+	silenceCounter[this.getIndex()]++
 
 public function unit.removeSilence()
-	StatusHandler.silenceCounter[this.getIndex()]--
-	if StatusHandler.silenceCounter[this.getIndex()] == 0
+	silenceCounter[this.getIndex()]--
+	if not this.isSilenced()
 		this.removeAbility(SILENCE_BUFF_ID)
-
+	
 public function unit.addSilenceTimed(real timeout)
-	this.addSilence()
-	doAfter(timeout, () -> this.removeSilence())
+	int i = this.getIndex()
+	if silenceTimer[i] != null and silenceTimer[i].getRemaining() >= timeout
+		return
+		
+	if silenceTimer[i] == null
+		silenceTimer[i] = getTimer()..setData(i)
+		this.addSilence()
+	
+	silenceTimer[i].start(timeout, () -> begin
+		int j = GetExpiredTimer().getData()
+		j.getUnit().removeSilence()
+		silenceTimer[j].release()
+		silenceTimer[j] = null
+	end)
+	
+public function unit.isSilenced() returns boolean
+	return silenceCounter[this.getIndex()] > 0
 	
 public function unit.addEnsnare()
-	StatusHandler.ensnareCounter[this.getIndex()]++
-	if StatusHandler.ensnareCounter[this.getIndex()] > 0
+	if not this.isEnsnared()
 		STATUS_DUMMY.issueTargetOrderById(ENSNARE_ORDER_ID, this)
+	ensnareCounter[this.getIndex()]++
 
 public function unit.removeEnsnare()
-	StatusHandler.ensnareCounter[this.getIndex()]--
-	if StatusHandler.ensnareCounter[this.getIndex()] == 0
+	ensnareCounter[this.getIndex()]--
+	if not this.isEnsnared()
 		this.removeAbility(ENSNARE1_BUFF_ID)
 		this.removeAbility(ENSNARE2_BUFF_ID)
 
 public function unit.addEnsnareTimed(real timeout)
-	this.addEnsnare()
-	doAfter(timeout, () -> this.removeEnsnare())
+	int i = this.getIndex()
+	if ensnareTimer[i] != null and ensnareTimer[i].getRemaining() >= timeout
+		return
+		
+	if ensnareTimer[i] == null
+		ensnareTimer[i] = getTimer()..setData(i)
+		this.addEnsnare()
+		
+	ensnareTimer[i].start(timeout, () -> begin
+		int j = GetExpiredTimer().getData()
+		j.getUnit().removeEnsnare()
+		ensnareTimer[j].release()
+		ensnareTimer[j] = null
+	end)
+		
+public function unit.isEnsnared() returns boolean
+	return ensnareCounter[this.getIndex()] > 0
 	
 public function unit.addDisarmBoth()
-	StatusHandler.disarmBothCounter[this.getIndex()]++
-	if StatusHandler.disarmBothCounter[this.getIndex()] > 0
+	if not this.isDisarmedBoth()
 		STATUS_DUMMY.issueTargetOrderById(DISARM_BOTH_ORDER_ID, this)
+	disarmBothCounter[this.getIndex()]++
 
 public function unit.removeDisarmBoth()
-	StatusHandler.disarmBothCounter[this.getIndex()]--
-	if StatusHandler.disarmBothCounter[this.getIndex()] == 0
+	disarmBothCounter[this.getIndex()]--
+	if not this.isDisarmedBoth()
 		this.removeAbility(DISARM_BOTH_BUFF_ID)
 
 public function unit.addDisarmBothTimed(real timeout)
-	this.addDisarmBoth()
-	doAfter(timeout, () -> this.removeDisarmBoth())
-
+	int i = this.getIndex()
+	if disarmBothTimer[i] != null and disarmBothTimer[i].getRemaining() >= timeout
+		return
+		
+	if disarmBothTimer[i] == null
+		disarmBothTimer[i] = getTimer()..setData(i)
+		this.addDisarmBoth()
+	
+	disarmBothTimer[i].start(timeout, () -> begin
+		int j = GetExpiredTimer().getData()
+		j.getUnit().removeDisarmBoth()
+		disarmBothTimer[j].release()
+		disarmBothTimer[j] = null
+	end)
+	
+public function unit.isDisarmedBoth() returns boolean
+	return disarmBothCounter[this.getIndex()] > 0
+	
 public function unit.addDisarmMelee()
-	StatusHandler.disarmMeleeCounter[this.getIndex()]++
-	if StatusHandler.disarmMeleeCounter[this.getIndex()] > 0
+	if not this.isDisarmedMelee()
 		STATUS_DUMMY1.issueTargetOrderById(DISARM_MELEE_ORDER_ID, this)
+	disarmMeleeCounter[this.getIndex()]++
 
 public function unit.removeDisarmMelee()
-	StatusHandler.disarmMeleeCounter[this.getIndex()]--
-	if StatusHandler.disarmMeleeCounter[this.getIndex()] == 0
+	disarmMeleeCounter[this.getIndex()]--
+	if not this.isDisarmedMelee()
 		this.removeAbility(DISARM_MELEE_BUFF_ID)
 
 public function unit.addDisarmMeleeTimed(real timeout)
-	this.addDisarmMelee()
-	doAfter(timeout, () -> this.removeDisarmMelee())
-
+	int i = this.getIndex()
+	if disarmMeleeTimer[i] != null and disarmMeleeTimer[i].getRemaining() >= timeout
+		return
+		
+	if disarmMeleeTimer[i] == null
+		disarmMeleeTimer[i] = getTimer()..setData(i)
+		this.addDisarmMelee()
+		
+	disarmMeleeTimer[i].start(timeout, () -> begin
+		int j = GetExpiredTimer().getData()
+		j.getUnit().removeDisarmMelee()
+		disarmMeleeTimer[j].release()
+		disarmMeleeTimer[j] = null
+	end)
+	
+public function unit.isDisarmedMelee() returns boolean
+	return disarmMeleeCounter[this.getIndex()] > 0
+	
 public function unit.addDisarmRanged()
-	StatusHandler.disarmRangedCounter[this.getIndex()]++
-	if StatusHandler.disarmRangedCounter[this.getIndex()] > 0
+	if not this.isDisarmedRanged()
 		STATUS_DUMMY2.issueTargetOrderById(DISARM_RANGED_ORDER_ID, this)
+	disarmRangedCounter[this.getIndex()]++
 
 public function unit.removeDisarmRanged()
-	StatusHandler.disarmRangedCounter[this.getIndex()]--
-	if StatusHandler.disarmRangedCounter[this.getIndex()] == 0
+	disarmRangedCounter[this.getIndex()]--
+	if not this.isDisarmedRanged()
 		this.removeAbility(DISARM_RANGED_BUFF_ID)
 
 public function unit.addDisarmRangedTimed(real timeout)
-	this.addDisarmRanged()
-	doAfter(timeout, () -> this.removeDisarmRanged())
+	int i = this.getIndex()
+	if disarmRangedTimer[i] != null and disarmRangedTimer[i].getRemaining() >= timeout
+		return
+		
+	if disarmRangedTimer[i] == null
+		disarmRangedTimer[i] = getTimer()..setData(i)
+		this.addDisarmRanged()
+		
+	disarmRangedTimer[i].start(timeout, () -> begin
+		int j = GetExpiredTimer().getData()
+		j.getUnit().removeDisarmRanged()
+		disarmRangedTimer[j].release()
+		disarmRangedTimer[j] = null
+	end)
 	
+public function unit.isDisarmedRanged() returns boolean
+	return disarmRangedCounter[this.getIndex()] > 0
+		
 init
 	STATUS_DUMMY..hide()
 		..addAbility(STUN_ABILITY_ID)

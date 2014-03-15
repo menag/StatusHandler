@@ -39,3 +39,6 @@ public constant string ENSNARE_ICON_PATH = "ReplaceableTextures\\CommandButtons\
 
 public function unit.getIndex() returns int
 	return 0
+	
+public function int.getUnit() returns unit
+	return null
