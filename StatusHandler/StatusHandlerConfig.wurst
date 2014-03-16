@@ -1,5 +1,7 @@
 package StatusHandlerConfig
 
+public constant int STATUS_DUMMY_START_AMOUNT = 500
+
 public constant int STUN_ABILITY_ID = 'SAST'
 public constant int STUN_BUFF_ID = 'SBST'
 public constant string STUN_TOOLTIP_NORMAL = "Stunned"
