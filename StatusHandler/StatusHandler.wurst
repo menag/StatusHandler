@@ -1,6 +1,5 @@
 package StatusHandler
 
-import ClosureTimers
 import StatusHandlerConfig
 import DummyCaster
 
