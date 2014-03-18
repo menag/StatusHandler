@@ -2,6 +2,7 @@ package StatusHandler
 
 import ClosureTimers
 import StatusHandlerConfig
+import DummyCaster
 
 constant int STUN_ORDER_ID = 852231
 constant int SILENCE_ORDER_ID = 852668
@@ -10,69 +11,12 @@ constant int DISARM_MELEE_ORDER_ID = 852585
 constant int DISARM_RANGED_ORDER_ID = 852585
 constant int ENSNARE_ORDER_ID = 852106
 
-unit array statusDummy1
-int maxStatusDummy1 = -1
-
-function getStatusDummy1() returns unit
-	if maxStatusDummy1 >= 0
-		print("get: " + maxStatusDummy1.toString())
-		maxStatusDummy1--
-		return statusDummy1[maxStatusDummy1 + 1]
-	return CreateUnit(DUMMY_PLAYER, DUMMY_UNIT_ID, 0., 0., 0.)
-		..hide()
-		..addAbility(STUN_ABILITY_ID)
-		..addAbility(DISARM_BOTH_ABILITY_ID)
-		
-function releaseStatusDummy1(unit u)
-	nullTimer(() -> begin
-		if maxStatusDummy1 < 8190
-			maxStatusDummy1++
-			statusDummy1[maxStatusDummy1] = u
-		else
-			u.remove()
-	end)
-
-unit array statusDummy2
-int maxStatusDummy2 = -1
-
-function getStatusDummy2() returns unit
-	if maxStatusDummy2 >= 0
-		maxStatusDummy2--
-		return statusDummy2[maxStatusDummy2 + 1]
-	return CreateUnit(DUMMY_PLAYER, DUMMY_UNIT_ID, 0., 0., 0.)
-		..hide()
-		..addAbility(SILENCE_ABILITY_ID)
-		..addAbility(DISARM_MELEE_ABILITY_ID)
-		
-function releaseStatusDummy2(unit u)
-	nullTimer(() -> begin
-		if maxStatusDummy2 < 8190
-			maxStatusDummy2++
-			statusDummy2[maxStatusDummy2] = u
-		else
-			u.remove()
-	end)
-
-unit array statusDummy3
-int maxStatusDummy3 = -1
-				
-function getStatusDummy3() returns unit
-	if maxStatusDummy3 >= 0
-		maxStatusDummy3--
-		return statusDummy3[maxStatusDummy3 + 1]
-	return CreateUnit(DUMMY_PLAYER, DUMMY_UNIT_ID, 0., 0., 0.)
-		..hide()
-		..addAbility(ENSNARE_ABILITY_ID)
-		..addAbility(DISARM_RANGED_ABILITY_ID)
-		
-function releaseStatusDummy3(unit u)
-	nullTimer(() -> begin
-		if maxStatusDummy3 < 8190
-			maxStatusDummy3++
-			statusDummy3[maxStatusDummy3] = u
-		else
-			u.remove()
-	end)
+constant DummyCaster STUN_DUMMY_CASTER = new DummyCaster(STUN_ABILITY_ID, OrderId2String(STUN_ORDER_ID), DUMMY_PLAYER, false)
+constant DummyCaster SILENCE_DUMMY_CASTER = new DummyCaster(SILENCE_ABILITY_ID, OrderId2String(SILENCE_ORDER_ID), DUMMY_PLAYER, false)
+constant DummyCaster DISARM_BOTH_DUMMY_CASTER = new DummyCaster(DISARM_BOTH_ABILITY_ID, OrderId2String(DISARM_BOTH_ORDER_ID), DUMMY_PLAYER, false)
+constant DummyCaster DISARM_MELEE_DUMMY_CASTER = new DummyCaster(DISARM_MELEE_ABILITY_ID, OrderId2String(DISARM_MELEE_ORDER_ID), DUMMY_PLAYER, false)
+constant DummyCaster DISARM_RANGED_DUMMY_CASTER = new DummyCaster(DISARM_RANGED_ABILITY_ID, OrderId2String(DISARM_RANGED_ORDER_ID), DUMMY_PLAYER, false)
+constant DummyCaster ENSNARE_DUMMY_CASTER = new DummyCaster(ENSNARE_ABILITY_ID, OrderId2String(ENSNARE_ORDER_ID), DUMMY_PLAYER, false)
 
 public class Status
 	protected static Status array status
@@ -120,7 +64,7 @@ public class Status
 
 public function unit.addStun()
 	if not this.isStunned()
-		releaseStatusDummy1(getStatusDummy1()..issueTargetOrderById(STUN_ORDER_ID, this))
+		STUN_DUMMY_CASTER.castOnTarget(this)
 	Status.status[this.getIndex()].stunCounter++
 
 public function unit.removeStun()
@@ -149,7 +93,7 @@ public function unit.isStunned() returns boolean
 	
 public function unit.addSilence()
 	if not this.isSilenced()
-		releaseStatusDummy2(getStatusDummy2()..issueTargetOrderById(SILENCE_ORDER_ID, this))
+		SILENCE_DUMMY_CASTER.castOnTarget(this)
 	Status.status[this.getIndex()].silenceCounter++
 
 public function unit.removeSilence()
@@ -178,7 +122,7 @@ public function unit.isSilenced() returns boolean
 	
 public function unit.addEnsnare()
 	if not this.isEnsnared()
-		releaseStatusDummy3(getStatusDummy2()..issueTargetOrderById(ENSNARE_ORDER_ID, this))
+		ENSNARE_DUMMY_CASTER.castOnTarget(this)
 	Status.status[this.getIndex()].ensnareCounter++
 
 public function unit.removeEnsnare()
@@ -208,7 +152,7 @@ public function unit.isEnsnared() returns boolean
 	
 public function unit.addDisarmBoth()
 	if not this.isDisarmedBoth()
-		releaseStatusDummy1(getStatusDummy1()..issueTargetOrderById(DISARM_BOTH_ORDER_ID, this))
+		DISARM_BOTH_DUMMY_CASTER.castOnTarget(this)
 	Status.status[this.getIndex()].disarmBothCounter++
 
 public function unit.removeDisarmBoth()
@@ -237,7 +181,7 @@ public function unit.isDisarmedBoth() returns boolean
 	
 public function unit.addDisarmMelee()
 	if not this.isDisarmedMelee()
-		releaseStatusDummy2(getStatusDummy2()..issueTargetOrderById(DISARM_MELEE_ORDER_ID, this))
+		DISARM_MELEE_DUMMY_CASTER.castOnTarget(this)
 	Status.status[this.getIndex()].disarmMeleeCounter++
 
 public function unit.removeDisarmMelee()
@@ -266,7 +210,7 @@ public function unit.isDisarmedMelee() returns boolean
 	
 public function unit.addDisarmRanged()
 	if not this.isDisarmedRanged()
-		releaseStatusDummy3(getStatusDummy3()..issueTargetOrderById(DISARM_RANGED_ORDER_ID, this))
+		DISARM_RANGED_DUMMY_CASTER.castOnTarget(this)
 	Status.status[this.getIndex()].disarmRangedCounter++
 
 public function unit.removeDisarmRanged()
@@ -292,21 +236,3 @@ public function unit.addDisarmRangedTimed(real timeout)
 	
 public function unit.isDisarmedRanged() returns boolean
 	return Status.status[this.getIndex()].disarmRangedCounter > 0
-	
-init
-	for int i = 1 to STATUS_DUMMY_START_AMOUNT
-		maxStatusDummy1++
-		statusDummy1[maxStatusDummy1] = CreateUnit(DUMMY_PLAYER, DUMMY_UNIT_ID, 0., 0., 0.)
-			..hide()
-			..addAbility(STUN_ABILITY_ID)
-			..addAbility(DISARM_BOTH_ABILITY_ID)
-		maxStatusDummy2++
-		statusDummy2[maxStatusDummy2] = CreateUnit(DUMMY_PLAYER, DUMMY_UNIT_ID, 0., 0., 0.)
-			..hide()
-			..addAbility(SILENCE_ABILITY_ID)
-			..addAbility(DISARM_MELEE_ABILITY_ID)
-		maxStatusDummy3++
-		statusDummy3[maxStatusDummy3] = CreateUnit(DUMMY_PLAYER, DUMMY_UNIT_ID, 0., 0., 0.)
-			..hide()
-			..addAbility(ENSNARE_ABILITY_ID)
-			..addAbility(DISARM_RANGED_ABILITY_ID)
