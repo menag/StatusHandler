@@ -23,6 +23,7 @@ function AbilityDefinition.setBasicValues()
 		..setIconNormal("")
 		..setEditorSuffix("(Status System)")
 		..setTargetsAllowed(1, "invulnerable,vulnerable")
+		..setRequiredLevel(6)
 		.setRace("other")
 
 /**
