@@ -37,8 +37,14 @@ public constant string ENSNARE_TOOLTIP_NORMAL = "Ensnared"
 public constant string ENSNARE_TOOLTIP_EXTENDED = "This unit is ensnared, it cannot move or fly."
 public constant string ENSNARE_ICON_PATH = "ReplaceableTextures\\CommandButtons\\BTNWirtsOtherLeg.blp"
 
+/**
+ * Implement this function to return a unique integer for every unit.
+ */
 public function unit.getIndex() returns int
 	return 0
 	
+/**
+ * Implement this function to return the related unit to this integer.
+ */
 public function int.getUnit() returns unit
 	return null

@@ -5,6 +5,9 @@ import BuffObjEditing
 import ObjectIds
 import StatusHandlerConfig
 
+/**
+ * Sets some basic values for the abilitys used to apply the status effects.
+ */
 function AbilityDefinition.setBasicValues()
 	this..setLevels(1)
 		..setCooldown(1, 0)
@@ -22,11 +25,17 @@ function AbilityDefinition.setBasicValues()
 		..setTargetsAllowed(1, "invulnerable,vulnerable")
 		.setRace("other")
 
+/**
+ * Sets some basic values for the buffs used to apply the status effects.
+ */
 function BuffDefinition.setBasicValues()
 	this..setRace(1, "other")
 		..setTarget(1, "")
 		.setEditorSuffix(0, "(Status System)")
 
+/**
+ * Generates the abilitys and buffs to apply the status effects.
+ */
 @compiletime function genAbilities()
 	new AbilityDefinitionFireBoltcreep(STUN_ABILITY_ID)
 		..setBasicValues()
