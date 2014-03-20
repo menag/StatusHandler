@@ -71,6 +71,14 @@ public class Status
 			ensnareTimer.release()
 
 /**
+ * Returns a boolean indicating if the unit is stunned.
+ *
+ * returns true if the unit is stunned, false otherwise
+ */
+public function unit.isStunned() returns boolean
+	return Status.status[this.getIndex()].stunCounter > 0
+
+/**
  * Applys a stun to the given unit. The duration is infinite. Hence you have to
  * remove it yourself. The function will count the amount of calls and will therefore
  * last till you removed all stuns which have been applied before.
@@ -79,19 +87,6 @@ public function unit.addStun()
 	if not this.isStunned()
 		STUN_DUMMY_CASTER.castOnTarget(this)
 	Status.status[this.getIndex()].stunCounter++
-
-/**
- * Removes one stun stack from the given unit. It is possible that the unit
- * is still stunned afterwards. Throws a warning if a non-existing stun is being
- * removed.
- */
-public function unit.removeStun()
-	Status.status[this.getIndex()].stunCounter--
-	if Status.status[this.getIndex()].stunCounter < 0
-		printWarning("StatusHandler: tried removing a non-existing stun.")
-		Status.status[this.getIndex()].stunCounter = 0
-	if not this.isStunned()
-		this.removeAbility(STUN_BUFF_ID)
 
 /**
  * Applies a timed stun to the given unit. If there is already a timed stun on this unit,
@@ -114,14 +109,55 @@ public function unit.addStunTimed(real timeout)
 		Status.status[j].stunTimer.release()
 		Status.status[j].stunTimer = null
 	end)
+
+/**
+ * Removes one stun stack from the given unit. It is possible that the unit
+ * is still stunned afterwards. Throws a warning if a non-existing stun is being
+ * removed.
+ */
+public function unit.removeStun()
+	Status.status[this.getIndex()].stunCounter--
+	if Status.status[this.getIndex()].stunCounter < 0
+		printWarning("StatusHandler: tried removing a non-existing stun.")
+		Status.status[this.getIndex()].stunCounter = 0
+	if not this.isStunned()
+		this.removeAbility(STUN_BUFF_ID)
+
+/**
+ * Removes the current timed stun from the given unit. This only removes
+ * the timed stun. Stuns applied with addStun() might still exist. Throws
+ * a warning if there is no timed stun active.
+ */
+public function unit.removeTimedStun()
+	int i = this.getIndex()
+	if Status.status[i].stunTimer != null
+		i.getUnit().removeStun()
+		Status.status[i].stunTimer.release()
+		Status.status[i].stunTimer = null
+	else
+		printWarning("StatusHandler: tried removing a non-existing timed stun.")
+
+/**
+ * Removes all stun stacks and the timed stun from the given unit. Afterwards
+ * the unit is not stunned anymore.
+ */
+public function unit.clearStun()
+	int i = this.getIndex()
+	if not this.isStunned()
+		this.removeAbility(STUN_BUFF_ID)
+	Status.status[i].stunCounter = 0
+	if Status.status[i].stunTimer != null
+		i.getUnit().removeStun()
+		Status.status[i].stunTimer.release()
+		Status.status[i].stunTimer = null
 	
 /**
- * Returns a boolean indicating if the unit is stunned.
+ * Returns a boolean indicating if the unit is silenced.
  *
- * returns true if the unit is stunned, false otherwise
+ * returns true if the unit is silenced, false otherwise
  */
-public function unit.isStunned() returns boolean
-	return Status.status[this.getIndex()].stunCounter > 0
+public function unit.isSilenced() returns boolean
+	return Status.status[this.getIndex()].silenceCounter > 0
 	
 /**
  * Applys a silence to the given unit. The duration is infinite. Hence you have to
@@ -133,19 +169,6 @@ public function unit.addSilence()
 		SILENCE_DUMMY_CASTER.castOnTarget(this)
 	Status.status[this.getIndex()].silenceCounter++
 
-/**
- * Removes one silence stack from the given unit. It is possible that the unit
- * is still silenced afterwards. Throws a warning if a non-existing silence is being
- * removed.
- */
-public function unit.removeSilence()
-	Status.status[this.getIndex()].silenceCounter--
-	if Status.status[this.getIndex()].silenceCounter < 0
-		printWarning("StatusHandler: tried removing a non-existing silence.")
-		Status.status[this.getIndex()].silenceCounter = 0
-	if not this.isSilenced()
-		this.removeAbility(SILENCE_BUFF_ID)
-	
 /**
  * Applies a timed silence to the given unit. If there is already a timed silence on this unit,
  * the silence with the longer duration will be used.
@@ -167,14 +190,55 @@ public function unit.addSilenceTimed(real timeout)
 		Status.status[j].silenceTimer.release()
 		Status.status[j].silenceTimer = null
 	end)
+
+/**
+ * Removes one silence stack from the given unit. It is possible that the unit
+ * is still silenced afterwards. Throws a warning if a non-existing silence is being
+ * removed.
+ */
+public function unit.removeSilence()
+	Status.status[this.getIndex()].silenceCounter--
+	if Status.status[this.getIndex()].silenceCounter < 0
+		printWarning("StatusHandler: tried removing a non-existing silence.")
+		Status.status[this.getIndex()].silenceCounter = 0
+	if not this.isSilenced()
+		this.removeAbility(SILENCE_BUFF_ID)
+
+/**
+ * Removes the current timed silence from the given unit. This only removes
+ * the timed silence. Silences applied with addSilence() might still exist. Throws
+ * a warning if there is no timed silence active.
+ */
+public function unit.removeTimedSilence()
+	int i = this.getIndex()
+	if Status.status[i].silenceTimer != null
+		i.getUnit().removeSilence()
+		Status.status[i].silenceTimer.release()
+		Status.status[i].silenceTimer = null
+	else
+		printWarning("StatusHandler: tried removing a non-existing timed silence.")
+
+/**
+ * Removes all silence stacks and the timed silence from the given unit. Afterwards
+ * the unit is not silenced anymore.
+ */
+public function unit.clearSilence()
+	int i = this.getIndex()
+	if not this.isSilenced()
+		this.removeAbility(SILENCE_BUFF_ID)
+	Status.status[i].silenceCounter = 0
+	if Status.status[i].silenceTimer != null
+		i.getUnit().removeSilence()
+		Status.status[i].silenceTimer.release()
+		Status.status[i].silenceTimer = null
 	
 /**
- * Returns a boolean indicating if the unit is silenced.
+ * Returns a boolean indicating if the unit is ensnared.
  *
- * returns true if the unit is silenced, false otherwise
- */
-public function unit.isSilenced() returns boolean
-	return Status.status[this.getIndex()].silenceCounter > 0
+ * returns true if the unit is ensnared, false otherwise
+ */	
+public function unit.isEnsnared() returns boolean
+	return Status.status[this.getIndex()].ensnareCounter > 0
 	
 /**
  * Ensnares the given unit. The duration is infinite. Hence you have to
@@ -185,20 +249,6 @@ public function unit.addEnsnare()
 	if not this.isEnsnared()
 		ENSNARE_DUMMY_CASTER.castOnTarget(this)
 	Status.status[this.getIndex()].ensnareCounter++
-
-/**
- * Removes one ensnare stack from the given unit. It is possible that the unit
- * is still ensnared afterwards. Throws a warning if a non-existing ensnare is being
- * removed.
- */
-public function unit.removeEnsnare()
-	Status.status[this.getIndex()].ensnareCounter--
-	if Status.status[this.getIndex()].ensnareCounter < 0
-		printWarning("StatusHandler: tried removing a non-existing ensnare.")
-		Status.status[this.getIndex()].ensnareCounter = 0
-	if not this.isEnsnared()
-		this.removeAbility(ENSNARE1_BUFF_ID)
-		this.removeAbility(ENSNARE2_BUFF_ID)
 
 /**
  * Applies a timed ensnare to the given unit. If there is already a timed ensnare on this unit,
@@ -221,15 +271,58 @@ public function unit.addEnsnareTimed(real timeout)
 		Status.status[j].ensnareTimer.release()
 		Status.status[j].ensnareTimer = null
 	end)
-	
+
 /**
- * Returns a boolean indicating if the unit is ensnared.
+ * Removes the current timed ensnare from the given unit. This only removes
+ * the timed ensnare. Ensnares applied with addEnsnare() might still exist. Throws
+ * a warning if there is no timed ensnare active.
+ */
+public function unit.removeTimedEnsnare()
+	int i = this.getIndex()
+	if Status.status[i].ensnareTimer != null
+		i.getUnit().removeEnsnare()
+		Status.status[i].ensnareTimer.release()
+		Status.status[i].ensnareTimer = null
+	else
+		printWarning("StatusHandler: tried removing a non-existing timed ensnare.")
+
+/**
+ * Removes all ensnare stacks and the timed ensnare from the given unit. Afterwards
+ * the unit is not ensnared anymore.
+ */
+public function unit.clearEnsnare()
+	int i = this.getIndex()
+	if not this.isEnsnared()
+		this.removeAbility(ENSNARE1_BUFF_ID)
+		this.removeAbility(ENSNARE2_BUFF_ID)
+	Status.status[i].ensnareCounter = 0
+	if Status.status[i].ensnareTimer != null
+		i.getUnit().removeEnsnare()
+		Status.status[i].ensnareTimer.release()
+		Status.status[i].ensnareTimer = null
+
+/**
+ * Removes one ensnare stack from the given unit. It is possible that the unit
+ * is still ensnared afterwards. Throws a warning if a non-existing ensnare is being
+ * removed.
+ */
+public function unit.removeEnsnare()
+	Status.status[this.getIndex()].ensnareCounter--
+	if Status.status[this.getIndex()].ensnareCounter < 0
+		printWarning("StatusHandler: tried removing a non-existing ensnare.")
+		Status.status[this.getIndex()].ensnareCounter = 0
+	if not this.isEnsnared()
+		this.removeAbility(ENSNARE1_BUFF_ID)
+		this.removeAbility(ENSNARE2_BUFF_ID)
+		
+/**
+ * Returns a boolean indicating if the unit is disarmed.
  *
- * returns true if the unit is ensnared, false otherwise
- */	
-public function unit.isEnsnared() returns boolean
-	return Status.status[this.getIndex()].ensnareCounter > 0
-	
+ * returns true if the unit is disarmed, false otherwise
+ */
+public function unit.isDisarmedBoth() returns boolean
+	return Status.status[this.getIndex()].disarmBothCounter > 0
+
 /**
  * Disarms the given unit. The duration is infinite. Hence you have to
  * remove it yourself. The function will count the amount of calls and will therefore
@@ -239,19 +332,6 @@ public function unit.addDisarmBoth()
 	if not this.isDisarmedBoth()
 		DISARM_BOTH_DUMMY_CASTER.castOnTarget(this)
 	Status.status[this.getIndex()].disarmBothCounter++
-
-/**
- * Removes one disarm stack from the given unit. It is possible that the unit
- * is still disarmed afterwards. Throws a warning if a non-existing disarmbuff is being
- * removed.
- */
-public function unit.removeDisarmBoth()
-	Status.status[this.getIndex()].disarmBothCounter--
-	if Status.status[this.getIndex()].disarmBothCounter < 0
-		printWarning("StatusHandler: tried removing a non-existing disarm both.")
-		Status.status[this.getIndex()].disarmBothCounter = 0
-	if not this.isDisarmedBoth()
-		this.removeAbility(DISARM_BOTH_BUFF_ID)
 
 /**
  * Applies a timed disarm to the given unit. If there is already a timed disarm on this unit,
@@ -274,15 +354,56 @@ public function unit.addDisarmBothTimed(real timeout)
 		Status.status[j].disarmBothTimer.release()
 		Status.status[j].disarmBothTimer = null
 	end)
-	
+
 /**
- * Returns a boolean indicating if the unit is disarmed.
- *
- * returns true if the unit is disarmed, false otherwise
+ * Removes one disarm stack from the given unit. It is possible that the unit
+ * is still disarmed afterwards. Throws a warning if a non-existing disarmbuff is being
+ * removed.
  */
-public function unit.isDisarmedBoth() returns boolean
-	return Status.status[this.getIndex()].disarmBothCounter > 0
-	
+public function unit.removeDisarmBoth()
+	Status.status[this.getIndex()].disarmBothCounter--
+	if Status.status[this.getIndex()].disarmBothCounter < 0
+		printWarning("StatusHandler: tried removing a non-existing disarm both.")
+		Status.status[this.getIndex()].disarmBothCounter = 0
+	if not this.isDisarmedBoth()
+		this.removeAbility(DISARM_BOTH_BUFF_ID)
+
+/**
+ * Removes the current timed disarm from the given unit. This only removes
+ * the timed disarm. Disarms applied with addDisarmBoth() might still exist. Throws
+ * a warning if there is no timed disarm active.
+ */
+public function unit.removeTimedDisarmBoth()
+	int i = this.getIndex()
+	if Status.status[i].disarmBothTimer != null
+		i.getUnit().removeDisarmBoth()
+		Status.status[i].disarmBothTimer.release()
+		Status.status[i].disarmBothTimer = null
+	else
+		printWarning("StatusHandler: tried removing a non-existing timed disarm both.")
+
+/**
+ * Removes all disarm stacks and the timed disarm from the given unit. Afterwards
+ * the unit is not disarmed anymore.
+ */
+public function unit.clearDisarmBoth()
+	int i = this.getIndex()
+	if not this.isDisarmedBoth()
+		this.removeAbility(DISARM_BOTH_BUFF_ID)
+	Status.status[i].disarmBothCounter = 0
+	if Status.status[i].disarmBothTimer != null
+		i.getUnit().removeDisarmBoth()
+		Status.status[i].disarmBothTimer.release()
+		Status.status[i].disarmBothTimer = null
+
+/**
+ * Returns a boolean indicating if the unit is melee-disarmed.
+ *
+ * returns true if the unit is melee-disarmed, false otherwise
+ */
+public function unit.isDisarmedMelee() returns boolean
+	return Status.status[this.getIndex()].disarmMeleeCounter > 0
+
 /**
  * Disarms the given melee unit. The duration is infinite. Hence you have to
  * remove it yourself. The function will count the amount of calls and will therefore
@@ -292,19 +413,6 @@ public function unit.addDisarmMelee()
 	if not this.isDisarmedMelee()
 		DISARM_MELEE_DUMMY_CASTER.castOnTarget(this)
 	Status.status[this.getIndex()].disarmMeleeCounter++
-
-/**
- * Removes one melee-disarm stack from the given unit. It is possible that the unit
- * is still melee-disarmed afterwards. Throws a warning if a non-existing melee-disarm is being
- * removed.
- */
-public function unit.removeDisarmMelee()
-	Status.status[this.getIndex()].disarmMeleeCounter--
-	if Status.status[this.getIndex()].disarmMeleeCounter < 0
-		printWarning("StatusHandler: tried removing a non-existing disarm melee.")
-		Status.status[this.getIndex()].disarmMeleeCounter = 0
-	if not this.isDisarmedMelee()
-		this.removeAbility(DISARM_MELEE_BUFF_ID)
 
 /**
  * Applies a timed melee-disarm to the given unit. If there is already a timed melee-disarm on this unit,
@@ -327,15 +435,56 @@ public function unit.addDisarmMeleeTimed(real timeout)
 		Status.status[j].disarmMeleeTimer.release()
 		Status.status[j].disarmMeleeTimer = null
 	end)
-	
+
 /**
- * Returns a boolean indicating if the unit is melee-disarmed.
- *
- * returns true if the unit is melee-disarmed, false otherwise
+ * Removes one melee-disarm stack from the given unit. It is possible that the unit
+ * is still melee-disarmed afterwards. Throws a warning if a non-existing melee-disarm is being
+ * removed.
  */
-public function unit.isDisarmedMelee() returns boolean
-	return Status.status[this.getIndex()].disarmMeleeCounter > 0
-	
+public function unit.removeDisarmMelee()
+	Status.status[this.getIndex()].disarmMeleeCounter--
+	if Status.status[this.getIndex()].disarmMeleeCounter < 0
+		printWarning("StatusHandler: tried removing a non-existing disarm melee.")
+		Status.status[this.getIndex()].disarmMeleeCounter = 0
+	if not this.isDisarmedMelee()
+		this.removeAbility(DISARM_MELEE_BUFF_ID)
+
+/**
+ * Removes the current timed melee-disarm from the given unit. This only removes
+ * the timed melee-disarm. Melee-disarms applied with addDisarmMelee() might still exist. Throws
+ * a warning if there is no timed melee-disarm active.
+ */
+public function unit.removeTimedDisarmMelee()
+	int i = this.getIndex()
+	if Status.status[i].disarmMeleeTimer != null
+		i.getUnit().removeDisarmMelee()
+		Status.status[i].disarmMeleeTimer.release()
+		Status.status[i].disarmMeleeTimer = null
+	else
+		printWarning("StatusHandler: tried removing a non-existing timed disarm melee.")
+
+/**
+ * Removes all melee-disarm stacks and the timed melee-disarm from the given unit. Afterwards
+ * the unit is not melee-disarmed anymore.
+ */
+public function unit.clearDisarmMelee()
+	int i = this.getIndex()
+	if not this.isDisarmedMelee()
+		this.removeAbility(DISARM_MELEE_BUFF_ID)
+	Status.status[i].disarmMeleeCounter = 0
+	if Status.status[i].disarmMeleeTimer != null
+		i.getUnit().removeDisarmMelee()
+		Status.status[i].disarmMeleeTimer.release()
+		Status.status[i].disarmMeleeTimer = null
+
+/**
+ * Returns a boolean indicating if the unit is range-disarmed.
+ *
+ * returns true if the unit is range-disarmed, false otherwise
+ */
+public function unit.isDisarmedRanged() returns boolean
+	return Status.status[this.getIndex()].disarmRangedCounter > 0
+
 /**
  * Disarms the given ranged unit. The duration is infinite. Hence you have to
  * remove it yourself. The function will count the amount of calls and will therefore
@@ -345,19 +494,6 @@ public function unit.addDisarmRanged()
 	if not this.isDisarmedRanged()
 		DISARM_RANGED_DUMMY_CASTER.castOnTarget(this)
 	Status.status[this.getIndex()].disarmRangedCounter++
-
-/**
- * Removes one range-disarm stack from the given unit. It is possible that the unit
- * is still range-disarmed afterwards. Throws a warning if a non-existing range-disarm is being
- * removed.
- */
-public function unit.removeDisarmRanged()
-	Status.status[this.getIndex()].disarmRangedCounter--
-	if Status.status[this.getIndex()].disarmRangedCounter < 0
-		printWarning("StatusHandler: tried removing a non-existing disarm ranged.")
-		Status.status[this.getIndex()].disarmRangedCounter = 0
-	if not this.isDisarmedRanged()
-		this.removeAbility(DISARM_RANGED_BUFF_ID)
 
 /**
  * Applies a timed range-disarm to the given unit. If there is already a timed range-disarm on this unit,
@@ -380,11 +516,56 @@ public function unit.addDisarmRangedTimed(real timeout)
 		Status.status[j].disarmRangedTimer.release()
 		Status.status[j].disarmRangedTimer = null
 	end)
-	
+
 /**
- * Returns a boolean indicating if the unit is range-disarmed.
- *
- * returns true if the unit is range-disarmed, false otherwise
+ * Removes one range-disarm stack from the given unit. It is possible that the unit
+ * is still range-disarmed afterwards. Throws a warning if a non-existing range-disarm is being
+ * removed.
  */
-public function unit.isDisarmedRanged() returns boolean
-	return Status.status[this.getIndex()].disarmRangedCounter > 0
+public function unit.removeDisarmRanged()
+	Status.status[this.getIndex()].disarmRangedCounter--
+	if Status.status[this.getIndex()].disarmRangedCounter < 0
+		printWarning("StatusHandler: tried removing a non-existing disarm ranged.")
+		Status.status[this.getIndex()].disarmRangedCounter = 0
+	if not this.isDisarmedRanged()
+		this.removeAbility(DISARM_RANGED_BUFF_ID)
+		
+/**
+ * Removes the current timed range-disarm from the given unit. This only removes
+ * the timed range-disarm. Range-disarms applied with addDisarmRanged() might still exist. Throws
+ * a warning if there is no timed range-disarm active.
+ */
+public function unit.removeTimedDisarmRanged()
+	int i = this.getIndex()
+	if Status.status[i].disarmRangedTimer != null
+		i.getUnit().removeDisarmRanged()
+		Status.status[i].disarmRangedTimer.release()
+		Status.status[i].disarmRangedTimer = null
+	else
+		printWarning("StatusHandler: tried removing a non-existing timed disarm ranged.")
+
+/**
+ * Removes all range-disarm stacks and the timed range-disarm from the given unit. Afterwards
+ * the unit is not range-disarmed anymore.
+ */
+public function unit.clearDisarmRanged()
+	int i = this.getIndex()
+	if not this.isDisarmedRanged()
+		this.removeAbility(DISARM_RANGED_BUFF_ID)
+	Status.status[i].disarmRangedCounter = 0
+	if Status.status[i].disarmRangedTimer != null
+		i.getUnit().removeDisarmRanged()
+		Status.status[i].disarmRangedTimer.release()
+		Status.status[i].disarmRangedTimer = null
+
+/**
+ * Removes all status effects. This includes the stacks and the timed effects. Afterwards
+ * the unit has no status effect applied anymore.
+ */	
+public function unit.clearAll()
+	this.clearStun()
+	this.clearSilence()
+	this.clearEnsnare()
+	this.clearDisarmBoth()
+	this.clearDisarmMelee()
+	this.clearDisarmRanged()
