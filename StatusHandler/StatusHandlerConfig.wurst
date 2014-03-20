@@ -31,7 +31,9 @@ public constant string DISARM_RANGED_TOOLTIP_EXTENDED = "This unit is disarmed; 
 public constant string DISARM_RANGED_ICON_PATH = "ReplaceableTextures\\CommandButtons\\BTNBattleStations.blp"
 
 public constant int ENSNARE_ABILITY_ID = 'SAEN'
+/** This is for ground units */
 public constant int ENSNARE1_BUFF_ID = 'SBE1'
+/** This is for air units */
 public constant int ENSNARE2_BUFF_ID = 'SBE2'
 public constant string ENSNARE_TOOLTIP_NORMAL = "Ensnared"
 public constant string ENSNARE_TOOLTIP_EXTENDED = "This unit is ensnared, it cannot move or fly."

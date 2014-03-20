@@ -22,19 +22,25 @@ constant DummyCaster ENSNARE_DUMMY_CASTER = new DummyCaster(ENSNARE_ABILITY_ID, 
  */
 public class Status
 	protected static Status array status
+	
 	protected timer stunTimer
-	protected timer silenceTimer
-	protected timer disarmBothTimer
-	protected timer disarmMeleeTimer
-	protected timer disarmRangedTimer
-	protected timer ensnareTimer
 	protected int stunCounter
+	
+	protected timer silenceTimer
 	protected int silenceCounter
-	protected int disarmBothCounter
-	protected int disarmMeleeCounter
-	protected int disarmRangedCounter
+	
+	protected timer ensnareTimer
 	protected int ensnareCounter
 	
+	protected timer disarmBothTimer
+	protected int disarmBothCounter
+	
+	protected timer disarmMeleeTimer
+	protected int disarmMeleeCounter
+	
+	protected timer disarmRangedTimer
+	protected int disarmRangedCounter
+		
 	/**
 	 * Constructs a Status object with the given unit.
 	 *
@@ -44,31 +50,31 @@ public class Status
 		int i = u.getIndex()
 		status[i] = this
 		stunTimer = null
-		silenceTimer = null
-		disarmBothTimer = null
-		disarmMeleeTimer = null
-		disarmRangedTimer = null
-		ensnareTimer = null
 		stunCounter = 0
+		silenceTimer = null
 		silenceCounter = 0
-		disarmBothCounter = 0
-		disarmMeleeCounter = 0
-		disarmRangedCounter = 0
+		ensnareTimer = null
 		ensnareCounter = 0
+		disarmBothTimer = null
+		disarmBothCounter = 0
+		disarmMeleeTimer = null
+		disarmMeleeCounter = 0
+		disarmRangedTimer = null
+		disarmRangedCounter = 0
 		
 	ondestroy
 		if stunTimer != null
 			stunTimer.release()
 		if silenceTimer != null
 			silenceTimer.release()
+		if ensnareTimer != null
+			ensnareTimer.release()
 		if disarmBothTimer != null
 			disarmBothTimer.release()
 		if disarmMeleeTimer != null
 			disarmMeleeTimer.release()
 		if disarmRangedTimer != null
 			disarmRangedTimer.release()
-		if ensnareTimer != null
-			ensnareTimer.release()
 
 /**
  * Returns a boolean indicating if the unit is stunned.
@@ -109,6 +115,29 @@ public function unit.addStunTimed(real timeout)
 		Status.status[j].stunTimer.release()
 		Status.status[j].stunTimer = null
 	end)
+
+/**
+ * Reduces the timed stun duration by the given amount. If the duration is smaller
+ * then the given amount the timed stun is getting removed.
+ *
+ * real timeout - the amount the duration is getting reduced
+ */
+public function unit.reduceTimedStun(real timeout)
+	int i = this.getIndex()
+	if Status.status[i].stunTimer == null
+		return
+	
+	if Status.status[i].stunTimer.getRemaining() - timeout > 0.
+		Status.status[i].stunTimer.start(Status.status[i].stunTimer.getRemaining() - timeout, () -> begin
+			int j = GetExpiredTimer().getData()
+			j.getUnit().removeStun()
+			Status.status[j].stunTimer.release()
+			Status.status[j].stunTimer = null
+		end)
+	else
+		this.removeStun()
+		Status.status[i].stunTimer.release()
+		Status.status[i].stunTimer = null
 
 /**
  * Removes one stun stack from the given unit. It is possible that the unit
@@ -192,6 +221,29 @@ public function unit.addSilenceTimed(real timeout)
 	end)
 
 /**
+ * Reduces the timed silence duration by the given amount. If the duration is smaller
+ * then the given amount the timed silence is getting removed.
+ *
+ * real timeout - the amount the duration is getting reduced
+ */
+public function unit.reduceTimedSilence(real timeout)
+	int i = this.getIndex()
+	if Status.status[i].silenceTimer == null
+		return
+	
+	if Status.status[i].silenceTimer.getRemaining() - timeout > 0.
+		Status.status[i].silenceTimer.start(Status.status[i].silenceTimer.getRemaining() - timeout, () -> begin
+			int j = GetExpiredTimer().getData()
+			j.getUnit().removeSilence()
+			Status.status[j].silenceTimer.release()
+			Status.status[j].silenceTimer = null
+		end)
+	else
+		this.removeSilence()
+		Status.status[i].silenceTimer.release()
+		Status.status[i].silenceTimer = null
+
+/**
  * Removes one silence stack from the given unit. It is possible that the unit
  * is still silenced afterwards. Throws a warning if a non-existing silence is being
  * removed.
@@ -271,6 +323,29 @@ public function unit.addEnsnareTimed(real timeout)
 		Status.status[j].ensnareTimer.release()
 		Status.status[j].ensnareTimer = null
 	end)
+	
+/**
+ * Reduces the timed ensnare duration by the given amount. If the duration is smaller
+ * then the given amount the timed ensnare is getting removed.
+ *
+ * real timeout - the amount the duration is getting reduced
+ */
+public function unit.reduceTimedEnsnare(real timeout)
+	int i = this.getIndex()
+	if Status.status[i].ensnareTimer == null
+		return
+	
+	if Status.status[i].ensnareTimer.getRemaining() - timeout > 0.
+		Status.status[i].ensnareTimer.start(Status.status[i].ensnareTimer.getRemaining() - timeout, () -> begin
+			int j = GetExpiredTimer().getData()
+			j.getUnit().removeEnsnare()
+			Status.status[j].ensnareTimer.release()
+			Status.status[j].ensnareTimer = null
+		end)
+	else
+		this.removeEnsnare()
+		Status.status[i].ensnareTimer.release()
+		Status.status[i].ensnareTimer = null
 
 /**
  * Removes the current timed ensnare from the given unit. This only removes
@@ -354,6 +429,29 @@ public function unit.addDisarmBothTimed(real timeout)
 		Status.status[j].disarmBothTimer.release()
 		Status.status[j].disarmBothTimer = null
 	end)
+	
+/**
+ * Reduces the timed disarm duration by the given amount. If the duration is smaller
+ * then the given amount the timed disarm is getting removed.
+ *
+ * real timeout - the amount the duration is getting reduced
+ */
+public function unit.reduceTimedDisarmBoth(real timeout)
+	int i = this.getIndex()
+	if Status.status[i].disarmBothTimer == null
+		return
+	
+	if Status.status[i].disarmBothTimer.getRemaining() - timeout > 0.
+		Status.status[i].disarmBothTimer.start(Status.status[i].disarmBothTimer.getRemaining() - timeout, () -> begin
+			int j = GetExpiredTimer().getData()
+			j.getUnit().removeDisarmBoth()
+			Status.status[j].disarmBothTimer.release()
+			Status.status[j].disarmBothTimer = null
+		end)
+	else
+		this.removeDisarmBoth()
+		Status.status[i].disarmBothTimer.release()
+		Status.status[i].disarmBothTimer = null
 
 /**
  * Removes one disarm stack from the given unit. It is possible that the unit
@@ -435,6 +533,29 @@ public function unit.addDisarmMeleeTimed(real timeout)
 		Status.status[j].disarmMeleeTimer.release()
 		Status.status[j].disarmMeleeTimer = null
 	end)
+	
+/**
+ * Reduces the timed melee-disarm duration by the given amount. If the duration is smaller
+ * then the given amount the timed melee-disarm is getting removed.
+ *
+ * real timeout - the amount the duration is getting reduced
+ */
+public function unit.reduceTimedDisarmMelee(real timeout)
+	int i = this.getIndex()
+	if Status.status[i].disarmMeleeTimer == null
+		return
+	
+	if Status.status[i].disarmMeleeTimer.getRemaining() - timeout > 0.
+		Status.status[i].disarmMeleeTimer.start(Status.status[i].disarmMeleeTimer.getRemaining() - timeout, () -> begin
+			int j = GetExpiredTimer().getData()
+			j.getUnit().removeDisarmMelee()
+			Status.status[j].disarmMeleeTimer.release()
+			Status.status[j].disarmMeleeTimer = null
+		end)
+	else
+		this.removeDisarmMelee()
+		Status.status[i].disarmMeleeTimer.release()
+		Status.status[i].disarmMeleeTimer = null
 
 /**
  * Removes one melee-disarm stack from the given unit. It is possible that the unit
@@ -516,6 +637,29 @@ public function unit.addDisarmRangedTimed(real timeout)
 		Status.status[j].disarmRangedTimer.release()
 		Status.status[j].disarmRangedTimer = null
 	end)
+
+/**
+ * Reduces the timed range-disarm duration by the given amount. If the duration is smaller
+ * then the given amount the timed range-disarm is getting removed.
+ *
+ * real timeout - the amount the duration is getting reduced
+ */
+public function unit.reduceTimedDisarmRanged(real timeout)
+	int i = this.getIndex()
+	if Status.status[i].disarmRangedTimer == null
+		return
+	
+	if Status.status[i].disarmRangedTimer.getRemaining() - timeout > 0.
+		Status.status[i].disarmRangedTimer.start(Status.status[i].disarmRangedTimer.getRemaining() - timeout, () -> begin
+			int j = GetExpiredTimer().getData()
+			j.getUnit().removeDisarmRanged()
+			Status.status[j].disarmRangedTimer.release()
+			Status.status[j].disarmRangedTimer = null
+		end)
+	else
+		this.removeDisarmRanged()
+		Status.status[i].disarmRangedTimer.release()
+		Status.status[i].disarmRangedTimer = null
 
 /**
  * Removes one range-disarm stack from the given unit. It is possible that the unit
